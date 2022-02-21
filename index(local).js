@@ -324,7 +324,7 @@ mongoose
   )
   .then(() => {
     console.log('Database Server Running')
-    app2.listen(process.env.PORT || 8000, () => {
+    app2.listen(process.env.PORT1 || 8000, () => {
       console.log("graphql Server running")
     });
 
