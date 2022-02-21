@@ -13,24 +13,11 @@ const { buildSchema } = require('graphql');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const isAuth = require('./middleware/is-auth');
-const fetch = require("node-fetch");
 
 
 require('dotenv').config();
 
-// For Websockets.io
-const server = require('http').createServer();
 
-//For Mqtt
-const mqtt = require("mqtt");
-
-let sendData = 0;
-let ACValue = 0;
-
-//Connect to React Frontend
-const cors = require('cors')
-app.use(express.json());
-app.use(cors());
 
 //For mongoose
 const app2 = express();
@@ -65,113 +52,7 @@ app2.use((req, res, next) => {
 //     res.json(entry);
 // });
 
-// Defining websockets
-const io= require('socket.io')(server,{
-  transports: ['websocket', 'polling']
-});
-
-//Variables
-var tempS = '';
-var humidityS = '';
-var pressureS = '';
-var lumS = '';
-// var timeFormated = '';
-
-//Connecting to mqtt
-var options={
-      port: "1883",
-      protocol: "mqtt",
-      clientId: "mqttjs01",
-      hostname: "broker.hivemq.com",
-    };
-var client = mqtt.connect(options);
-client.subscribe("AIEMSL1/temperature");
-client.subscribe("AIEMSL1/humidity");
-client.subscribe("AIEMSL1/pressure");
-client.subscribe("AIEMSL1/luminance"); 
-// console.log("connected  "+client.connected);
-
-client.on('message', function(topic, msg){
-  console.log(topic+" Message Recieved -> "+msg.toString());
-  // if(acValueRecieve){
-  //   client.publish('AIEMSL1/ACD', acTemp.toString(),opts=options);
-  //   acValueRecieve=false
-  //   console.log('AC value sent');
-  // }
-  if(topic.toString()==="AIEMSL1/temperature"){
-    tempS = msg.toString();
-    sendData++;
-      }
-  if(topic.toString()==="AIEMSL1/humidity"){
-    humidityS = msg.toString();
-    sendData++;
-  }
-  if(topic.toString()==="AIEMSL1/pressure"){
-    pressureS = msg.toString();
-    sendData++;
-  }
-  if(topic.toString()==="AIEMSL1/luminance"){
-    lumS = msg.toString();
-    sendData++;
-  }
-  //Send Data to ac
-  if(ACValue!=0){
-    if(client.connected){
-      client.publish('AIEMSL1/ACD', ACValue.toString(),opts=options);
-      console.log('Ac Value sent');
-      
-    }else{
-      console.log('Ac Value not sent');
-    }
-    ACValue=0
-  }
-  
-  // emit to sockets.io
-  io.emit('cpu',{name: 'cpu', temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
-  console.log(sendData);
-  if(sendData===4){
-    let date_ob = new Date().toISOString();
-    const event = new EntryModel({
-      readingtime: new Date().toISOString(),
-      temperature: tempS,
-      humidity: humidityS,
-      pressure: pressureS,
-      altitude: lumS,
-      temperature_status: "Coming Soon",
-      humidity_status: "Coming Soon",
-      pressure_status: "Coming Soon",
-    });
-    return event.save().then((r)=>{
-      console.log('saved to database');
-      sendData=0;
-    }    
-    ).catch(err=>{
-      console.log('Error saving to database');
-            });  
-    // axios.post("http://localhost:3001/createEntry", {
-    //           readingtime: date_ob,
-    //           temperature: tempS,
-    //           humidity: humidityS,
-    //           pressure: pressureS,
-    //           altitude: lumS,
-    //           temperature_status: "Coming Soon",
-    //           humidity_status: "Coming Soon",
-    //           pressure_status: "Coming Soon",
-    //         }).then((response) => {
-    //           console.log('Data Sent')
-    //           sendData=0;
-    //       }).catch(err=>{
-    //         throw err;
-    //       });   
-  }
-})
-// setInterval(()=>{
-  
-//   }, 5000);
-io.on("connection", (socket) => {
-  console.log('MQTT connection established')
-  io.emit('cpu',{name: 'cpu', temp: tempS, humidity: humidityS, pressure: pressureS, lum: lumS });
-});
+;
 //GraphQl API
 app2.use(
   '/graphql',
@@ -242,6 +123,8 @@ app2.use(
         }
       },
       recieveACvalue: async({input})=>{
+        console.log('Ac value recieved');
+        // io.emit("AC",{value:+input});
         if(client.connected){
           client.publish('AIEMSL1/ACD', input.toString(),opts=options);
           console.log('Ac Value sent');
@@ -320,7 +203,8 @@ app2.use(
 
 mongoose
   .connect(
-    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.p3ddg.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
+    // `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.p3ddg.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
+    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/merntutorial?retryWrites=true&w=majority`
   )
   .then(() => {
     console.log('Database Server Running')
@@ -328,9 +212,7 @@ mongoose
       console.log("graphql Server running")
     });
 
-    server.listen(process.env.PORT2 || 4001, () => {
-      console.log("Sockets Server Running");
-    });
+    
     
     // app.listen(3001, () => {
     //   console.log("HTTP server runs perfectly")
