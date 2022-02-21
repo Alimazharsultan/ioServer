@@ -1,0 +1,9 @@
+
+{
+    "env":{
+        "MONGO_USER": "ali",
+        "MONGO_PASSWORD": "great",
+        "MONGO_DB": "merntutorial"
+        
+    }
+}
