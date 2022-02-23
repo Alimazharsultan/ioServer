@@ -98,7 +98,7 @@ app2.use(
           password: String!
         }
         type RootQuery {
-            events(cutoff: String!): [Event!]!
+            events(cutoff1: String!,cutoff2: String): [Event!]!
             login(username: String!, password: String!): AuthData!
         }
         type RootMutation {
@@ -112,9 +112,9 @@ app2.use(
         }
     `),
     rootValue: {
-      events: async({cutoff}) => {
+      events: async({cutoff1,cutoff2}) => {
         try {
-          const events = await EntryModel.find({ readingtime: { $gte: cutoff } });
+          const events = await EntryModel.find({ readingtime: { $gte: cutoff1, $lte:cutoff2} });
           return events.map(event => {
             return { ...event._doc, _id: event.id };
           });
