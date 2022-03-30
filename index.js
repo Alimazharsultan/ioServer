@@ -204,7 +204,7 @@ app2.use(
 mongoose
   .connect(
     // `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.p3ddg.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
-    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/AIEMSLAB?retryWrites=true&w=majority`
+    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/merntutorial?retryWrites=true&w=majority`
   )
   .then(() => {
     console.log('Database Server Running')
