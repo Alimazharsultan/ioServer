@@ -14,10 +14,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const isAuth = require('./middleware/is-auth');
 
-
 require('dotenv').config();
-
-
 
 //For mongoose
 const app2 = express();
@@ -34,7 +31,6 @@ app2.use((req, res, next) => {
   }
   next();
 });
-
 
 // app.get("/getData", (req, res) => {
 //     EntryModel.find({}, (err, result)=>{
@@ -208,15 +204,10 @@ mongoose
   )
   .then(() => {
     console.log('Database Server Running')
-    app2.listen(process.env.PORT || 8000, () => {
+    app2.listen(process.env.PORT || 4001, () => {
       console.log("graphql Server running")
     });
 
-    
-    
-    // app.listen(3001, () => {
-    //   console.log("HTTP server runs perfectly")
-    // });
   })
   .catch(err => {
     console.log(err);
