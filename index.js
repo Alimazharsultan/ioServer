@@ -4,7 +4,7 @@
 const express = require("express")
 const app = express();
 const mongoose = require('mongoose')
-const EntryModel = require('./models/location3data')
+const EntryModel2 = require('./models/edl0002')
 const User = require('./models/users')
 const axios = require('axios')
 const bodyParser = require('body-parser');
@@ -33,7 +33,7 @@ app2.use((req, res, next) => {
 });
 
 // app.get("/getData", (req, res) => {
-//     EntryModel.find({}, (err, result)=>{
+//     EntryModel2.find({}, (err, result)=>{
 //         if (err){
 //             res.json(err);
 //         } else {
@@ -43,7 +43,7 @@ app2.use((req, res, next) => {
 // });
 // app.post("/createEntry", async (req, res) => {
 //     const entry = req.body
-//     const newEntry = new EntryModel(entry);
+//     const newEntry = new EntryModel2(entry);
 //     await newEntry.save();
 //     res.json(entry);
 // });
@@ -95,6 +95,8 @@ app2.use(
         }
         type RootQuery {
             events(cutoff1: String!,cutoff2: String): [Event!]!
+            events1(cutoff1: String!,cutoff2: String): [Event!]!
+            events3(cutoff1: String!,cutoff2: String): [Event!]!
             login(username: String!, password: String!): AuthData!
         }
         type RootMutation {
@@ -110,7 +112,27 @@ app2.use(
     rootValue: {
       events: async({cutoff1,cutoff2}) => {
         try {
-          const events = await EntryModel.find({ readingtime: { $gte: cutoff1, $lte:cutoff2} });
+          const events = await EntryModel2.find({ readingtime: { $gte: cutoff1, $lte:cutoff2} });
+          return events.map(event => {
+            return { ...event._doc, _id: event.id };
+          });
+        } catch (err) {
+          throw err;
+        }
+      },
+      events1: async({cutoff1,cutoff2}) => {
+        try {
+          const events = await EntryModel1.find({ readingtime: { $gte: cutoff1, $lte:cutoff2} });
+          return events.map(event => {
+            return { ...event._doc, _id: event.id };
+          });
+        } catch (err) {
+          throw err;
+        }
+      },
+      events3: async({cutoff1,cutoff2}) => {
+        try {
+          const events = await EntryModel3.find({ readingtime: { $gte: cutoff1, $lte:cutoff2} });
           return events.map(event => {
             return { ...event._doc, _id: event.id };
           });
@@ -136,7 +158,7 @@ app2.use(
         // if(!req.isAuth){
         //   throw new Error("Unauthenticated!");
         // }
-        const event = new EntryModel({
+        const event = new EntryModel2({
           readingtime: new Date().toISOString(),
           temperature: args.eventInput.temperature,
           humidity: args.eventInput.humidity,
@@ -200,7 +222,7 @@ app2.use(
 mongoose
   .connect(
     // `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASSWORD}@cluster0.p3ddg.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`
-    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/merntutorial?retryWrites=true&w=majority`
+    `mongodb+srv://ali:great@cluster0.p3ddg.mongodb.net/AIMS?retryWrites=true&w=majority`
   )
   .then(() => {
     console.log('Database Server Running')
